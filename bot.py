@@ -1,33 +1,31 @@
 import telebot
-import requests
+import google.generativeai as genai
 import os
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-GROQ_KEY = os.environ.get("GROQ_KEY", "")
 
+GEMINI_KEYS = [
+    os.environ.get("GEMINI_KEY1", ""),
+    os.environ.get("GEMINI_KEY2", ""),
+    os.environ.get("GEMINI_KEY3", ""),
+]
+
+current_key = 0
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
-user_histories = {}
+user_chats = {}
 
-def ask_groq(messages):
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {GROQ_KEY}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "model": "groq/compound-mini",
-        "messages": messages,
-        "max_tokens": 1000
-    }
-    res = requests.post(url, headers=headers, json=data)
-    result = res.json()
-    if 'error' in result:
-        return f"Xato: {result['error']['message']}"
-    return result['choices'][0]['message']['content']
+def get_model():
+    global current_key
+    for i in range(len(GEMINI_KEYS)):
+        key = GEMINI_KEYS[(current_key + i) % len(GEMINI_KEYS)]
+        if key:
+            genai.configure(api_key=key)
+            return genai.GenerativeModel("gemini-1.5-flash")
+    return None
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    user_histories[message.chat.id] = []
+    user_chats[message.chat.id] = get_model().start_chat(history=[])
     bot.send_message(message.chat.id,
         "Salom! 👋\n"
         "Men Aizo.\n"
@@ -36,31 +34,31 @@ def start(message):
 
 @bot.message_handler(commands=['clear'])
 def clear(message):
-    user_histories[message.chat.id] = []
+    user_chats[message.chat.id] = get_model().start_chat(history=[])
     bot.send_message(message.chat.id, "🗑 Tozalandi!")
 
 @bot.message_handler(func=lambda m: True)
 def reply(message):
+    global current_key
     user_id = message.chat.id
     bot.send_chat_action(user_id, 'typing')
-    if user_id not in user_histories:
-        user_histories[user_id] = []
-    user_histories[user_id].append({
-        "role": "user",
-        "content": message.text
-    })
-    messages = [
-        {
-            "role": "system",
-            "content": "Sen Aizo degan aqlli yordamchisan. O'zbek tilida qisqa va aniq javob ber."
-        }
-    ] + user_histories[user_id]
-    answer = ask_groq(messages)
-    user_histories[user_id].append({
-        "role": "assistant",
-        "content": answer
-    })
-    bot.send_message(user_id, answer)
+    if user_id not in user_chats:
+        user_chats[user_id] = get_model().start_chat(history=[])
+    try:
+        response = user_chats[user_id].send_message(message.text)
+        bot.send_message(user_id, response.text)
+    except Exception as e:
+        error = str(e)
+        if "quota" in error.lower() or "limit" in error.lower():
+            current_key = (current_key + 1) % len(GEMINI_KEYS)
+            user_chats[user_id] = get_model().start_chat(history=[])
+            try:
+                response = user_chats[user_id].send_message(message.text)
+                bot.send_message(user_id, response.text)
+            except:
+                bot.send_message(user_id, "⏳ Limit tugadi! Biroz kuting.")
+        else:
+            bot.send_message(user_id, f"❌ Xatolik: {error}")
 
 print("✅ Aizo ishga tushdi!")
 bot.polling(none_stop=True)
