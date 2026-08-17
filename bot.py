@@ -1,54 +1,63 @@
 import telebot
-import requests
+import google.generativeai as genai
 import os
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-GROQ_KEY1 = os.environ.get("GROQ_KEY1", "")
-GROQ_KEY2 = os.environ.get("GROQ_KEY2", "")
-GROQ_KEY3 = os.environ.get("GROQ_KEY3", "")
 
-KEYS = [GROQ_KEY1, GROQ_KEY2, GROQ_KEY3]
-current = 0
+GEMINI_KEYS = [
+    os.environ.get("GEMINI_KEY1", ""),
+    os.environ.get("GEMINI_KEY2", ""),
+]
+
+current_key = 0
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
-chats = {}
+user_chats = {}
 
-def ask(messages):
-    global current
-    for i in range(len(KEYS)):
-        key = KEYS[(current + i) % len(KEYS)]
-        if not key:
-            continue
-        res = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={"model": "groq/compound-mini", "messages": messages, "max_tokens": 1000}
-        ).json()
-        if 'error' in res:
-            current = (current + 1) % len(KEYS)
-            continue
-        return res['choices'][0]['message']['content']
-    return "⏳ Limit tugadi! Kuting."
+def get_model():
+    global current_key
+    for i in range(len(GEMINI_KEYS)):
+        key = GEMINI_KEYS[(current_key + i) % len(GEMINI_KEYS)]
+        if key:
+            genai.configure(api_key=key)
+            return genai.GenerativeModel("gemini-1.5-flash")
+    return None
 
 @bot.message_handler(commands=['start'])
-def start(m):
-    chats[m.chat.id] = []
-    bot.send_message(m.chat.id, "Salom! 👋\nMen Aizo.\nNima yordam kerak?")
+def start(message):
+    user_chats[message.chat.id] = get_model().start_chat(history=[])
+    bot.send_message(message.chat.id,
+        "Salom! 👋\n"
+        "Men Aizo.\n"
+        "Nima yordam kerak?"
+    )
 
 @bot.message_handler(commands=['clear'])
-def clear(m):
-    chats[m.chat.id] = []
-    bot.send_message(m.chat.id, "🗑 Tozalandi!")
+def clear(message):
+    user_chats[message.chat.id] = get_model().start_chat(history=[])
+    bot.send_message(message.chat.id, "🗑 Tozalandi!")
 
 @bot.message_handler(func=lambda m: True)
-def reply(m):
-    bot.send_chat_action(m.chat.id, 'typing')
-    if m.chat.id not in chats:
-        chats[m.chat.id] = []
-    chats[m.chat.id].append({"role": "user", "content": m.text})
-    messages = [{"role": "system", "content": "Sen Aizo degan aqlli yordamchisan. O'zbek tilida javob ber."}] + chats[m.chat.id]
-    answer = ask(messages)
-    chats[m.chat.id].append({"role": "assistant", "content": answer})
-    bot.send_message(m.chat.id, answer)
+def reply(message):
+    global current_key
+    user_id = message.chat.id
+    bot.send_chat_action(user_id, 'typing')
+    if user_id not in user_chats:
+        user_chats[user_id] = get_model().start_chat(history=[])
+    try:
+        response = user_chats[user_id].send_message(message.text)
+        bot.send_message(user_id, response.text)
+    except Exception as e:
+        error = str(e)
+        if "quota" in error.lower() or "limit" in error.lower():
+            current_key = (current_key + 1) % len(GEMINI_KEYS)
+            user_chats[user_id] = get_model().start_chat(history=[])
+            try:
+                response = user_chats[user_id].send_message(message.text)
+                bot.send_message(user_id, response.text)
+            except:
+                bot.send_message(user_id, "⏳ Limit tugadi! Biroz kuting.")
+        else:
+            bot.send_message(user_id, f"❌ Xatolik: {error}")
 
 print("✅ Aizo ishga tushdi!")
 bot.polling(none_stop=True)
