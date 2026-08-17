@@ -15,7 +15,7 @@ def ask_groq(messages):
         "Content-Type": "application/json"
     }
     data = {
-        "model": "llama3-8b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": messages,
         "max_tokens": 1000
     }
