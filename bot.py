@@ -19,7 +19,7 @@ def get_model():
         key = GEMINI_KEYS[(current_key + i) % len(GEMINI_KEYS)]
         if key:
             genai.configure(api_key=key)
-            return genai.GenerativeModel("gemini-1.5-flash")
+            return genai.GenerativeModel("gemini-2.5-flash")
     return None
 
 @bot.message_handler(commands=['start'])
