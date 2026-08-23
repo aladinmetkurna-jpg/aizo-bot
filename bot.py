@@ -15,7 +15,7 @@ def ask_grok(messages):
         "Content-Type": "application/json"
     }
     data = {
-        "model": "grok-4",
+        "model": "grok-4-3",
         "messages": messages,
         "max_tokens": 1000
     }
