@@ -3,19 +3,19 @@ import requests
 import os
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-GROQ_KEY = os.environ.get("GROQ_KEY", "")
+XAI_KEY = os.environ.get("XAI_KEY", "")
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 user_histories = {}
 
-def ask_groq(messages):
-    url = "https://api.groq.com/openai/v1/chat/completions"
+def ask_grok(messages):
+    url = "https://api.x.ai/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {GROQ_KEY}",
+        "Authorization": f"Bearer {XAI_KEY}",
         "Content-Type": "application/json"
     }
     data = {
-        "model": "groq/compound-mini",
+        "model": "grok-4",
         "messages": messages,
         "max_tokens": 1000
     }
@@ -55,7 +55,7 @@ def reply(message):
             "content": "Sen Aizo degan aqlli yordamchisan. O'zbek tilida qisqa va aniq javob ber."
         }
     ] + user_histories[user_id]
-    answer = ask_groq(messages)
+    answer = ask_grok(messages)
     user_histories[user_id].append({
         "role": "assistant",
         "content": answer
