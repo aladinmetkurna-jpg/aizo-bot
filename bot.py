@@ -15,14 +15,25 @@ def ask_grok(messages):
         "Content-Type": "application/json"
     }
     data = {
-        "model": "grok-4-3",
+        "model": "grok-4-fast",
         "messages": messages,
         "max_tokens": 1000
     }
     res = requests.post(url, headers=headers, json=data)
-    result = res.json()
+    try:
+        result = res.json()
+    except ValueError:
+        return f"Xato: server javobi JSON emas (status {res.status_code}): {res.text[:300]}"
+
     if 'error' in result:
-        return f"Xato: {result['error']['message']}"
+        err = result['error']
+        if isinstance(err, dict):
+            err = err.get('message', str(err))
+        return f"Xato: {err}"
+
+    if 'choices' not in result:
+        return f"Xato: kutilmagan javob (status {res.status_code}): {result}"
+
     return result['choices'][0]['message']['content']
 
 @bot.message_handler(commands=['start'])
