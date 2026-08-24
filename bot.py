@@ -38,7 +38,7 @@ if not GEMINI_KEY:
 
 
 # Gemini modeli
-MODEL_NAME = "gemini-3.7-flash"
+MODEL_NAME = "gemini-3.6-flash"
 
 
 # Botning asosiy ko‘rsatmasi
@@ -196,8 +196,7 @@ def start_command(message):
 
     bot.send_message(
         message.chat.id,
-        "Salom! 👋\n\n"
-        "Men Aizo"
+        "Salom!👋🏻 Men Aizo\n\n"
         "Shohruxning AI yordamchisiman.\n\n"
         "Savolingizni yozishingiz mumkin."
     )
