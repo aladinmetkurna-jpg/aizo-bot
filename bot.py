@@ -38,7 +38,7 @@ if not GEMINI_KEY:
 
 
 # Gemini modeli
-MODEL_NAME = "gemini-3.6-flash"
+MODEL_NAME = "gemini-2.5-flash"
 
 
 # Botning asosiy ko‘rsatmasi
