@@ -1,1 +1,2 @@
-pip install -U google-genai pyTelegramBotAPI
+pyTelegramBotAPI
+google-genai
