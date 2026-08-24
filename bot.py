@@ -6,7 +6,7 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 GEMINI_KEY = os.environ.get("GEMINI_KEY", "")
 
 genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel("gemini-3.6-flash")
+model = genai.GenerativeModel("gemini-3.7-flash")
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 user_chats = {}
