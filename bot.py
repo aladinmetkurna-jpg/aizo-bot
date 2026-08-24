@@ -13,8 +13,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 # START BOSILGANDA
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    bot.reply_to(message, "salom 👋🏻, Shohruxning AI botiga hush kelibsiz! 
-Sizga qanday yordam bera olaman")
+    bot.reply_to(message, "salom 👋🏻,Shohruxning AI botiga hush kelibsiz!")
 
 
 # HAR QANDAY MESSAGE KELGANDA
