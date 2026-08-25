@@ -899,8 +899,8 @@ if __name__ == "__main__":
     try:
 
         bot.infinity_polling(
-            timeout=60,
-            long_polling_timeout=30
+            timeout=30,
+            long_polling_timeout=20
         )
 
     except KeyboardInterrupt:
