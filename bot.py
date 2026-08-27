@@ -13,7 +13,7 @@ from openai import OpenAI
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-MODEL_NAME = "deepseek-v4-flash"
+MODEL_NAME = "deepseek-v4-flash-vision-exp"
 
 MAX_TELEGRAM_LENGTH = 4096
 
