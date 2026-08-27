@@ -18,7 +18,7 @@ DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 MODEL_NAME = "deepseek-v4-flash-vision-exp"
 
-MAX_TELEGRAM_LENGTH = 4096
+MAX_TELEGRAM_LENGTH = 2500
 
 # Har bir user uchun saqlanadigan suhbat xabarlari soni
 MAX_HISTORY_MESSAGES = 40
@@ -98,6 +98,8 @@ Javoblaring tabiiy, tushunarli va foydali bo'lsin.
 Texnik savollarga aniq va amaliy javob ber.
 
 Kod so'ralsa, imkon qadar to'liq va ishlaydigan kod ber.
+
+Savolga juda uzun javob berib yuborma.
 
 Agar foydalanuvchi kod yuborsa va unda xato bo'lsa,
 xatoni top, sababini tushuntir va tuzatilgan kodni ber.
